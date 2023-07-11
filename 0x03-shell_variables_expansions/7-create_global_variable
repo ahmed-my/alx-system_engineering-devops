@@ -1,2 +1,2 @@
 #!/bin/bash
-explore BEST="School"
+echo $((2#$BEST School))
