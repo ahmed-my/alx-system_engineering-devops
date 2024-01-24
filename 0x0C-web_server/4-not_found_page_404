@@ -25,10 +25,35 @@ cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.b
 echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
 # Configuring 404 page
-sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/error_404.html > /dev/null
+sudo tee /etc/nginx/sites-available/error_404 <<EOL
+server {
+    listen 80;
+    server_name _;
 
-# Restarting nginx
+    location / {
+        return 200 'Hello World!';
+    }
+
+    location /redirect_me {
+        return 301 http://www.example.com;
+    }
+
+    location = /error_404.html {
+        root /var/www/html;
+        internal;
+    }
+
+    error_page 404 /error_404.html;
+
+    location /error_404.html {
+        internal;
+        default_type "text/html";
+        return 404 "Ceci n'est pas une page";
+    }
+}
+EOL
+
+sudo ln -s /etc/nginx/sites-available/error_404 /etc/nginx/sites-enabled/
 sudo service nginx restart
 
 echo -e "\nCompleted.\n"
