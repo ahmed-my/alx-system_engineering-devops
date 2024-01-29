@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Configures a new Ubuntu machine by installing Nginx to listen on port 80
-# Returns a page with Hello World string and adds a custom HTTP header
+# Configures Nginx so that its HTTP response contains a custom header(on web-01 and web-2)
 
 echo -e "Updating and installing Nginx.\n"
 sudo apt-get update -y -qq && \
