@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Configures a new Ubuntu machine by installing Nginx to listen on port 80
+# Returns a page with Hello World string and adds a custom HTTP header
+
+echo -e "Updating and installing Nginx.\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
+
+echo -e "\nSetting up some minor stuff.\n"
+
+# Starting Nginx service
+sudo service nginx start
+
+# Allowing Nginx on firewall
+sudo ufw allow 'Nginx HTTP'
+
+# User ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
+
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+
+# Create new index with custom header
+cat <<EOL > /var/www/html/index.nginx-debian.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello World Page</title>
+</head>
+<body>
+    <h1>Hello World!</h1>
+</body>
+</html>
+EOL
+
+# Add custom HTTP header to Nginx default site configuration
+echo -e "server {\n\tlisten 80;\n\tlocation / {\n\t\tadd_header X-Served-By \$host;\n\t\tinclude /etc/nginx/sites-available/default;\n\t}\n}" | sudo tee /etc/nginx/sites-available/default > /dev/null
+
+# Restart Nginx
+sudo service nginx restart
+
+echo -e "\nCompleted.  \n"
+
