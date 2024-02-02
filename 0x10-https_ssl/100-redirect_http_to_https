@@ -1,4 +1,5 @@
-global
+
+bal
         log /dev/log    local0
         log /dev/log    local1 notice
         chroot /var/lib/haproxy
@@ -33,19 +34,19 @@ defaults
         errorfile 503 /etc/haproxy/errors/503.http
         errorfile 504 /etc/haproxy/errors/504.http
 
-frontend clickviral-frontend
+frontend ahmedglobal-frontend
         bind *:80
         mode http
         http-request redirect scheme https code 301 unless { ssl_fc }
-        http-request set-header X_Forwarded-Proto http
-        default_backend ahmedglobal-backend
+        http-request set-header X-Forwarded-Proto http
+        default_backend ahmedglobal-tech-backend
 
-frontend clickviral-frontend-https
+frontend ahmedglobal-frontend-https
         bind *:443 ssl crt /etc/haproxy/certs/www.ahmedglobal.tech.pem
         http-request set-header X-Forwarded-Proto https
-        default_backend ahmedglobal-backend
+        default_backend ahmedglobal-tech-backend
 
-backend ahmedglobal-backend
+backend ahmedglobal-tech-backend
         balance roundrobin
         server 464990-web-01 54.164.133.175:80 check
         server 464990-web-02 18.210.18.243:80 check
