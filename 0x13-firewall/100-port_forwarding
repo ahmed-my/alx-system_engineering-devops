@@ -1,32 +1,43 @@
-#!/bin/bash
+# ok icmp codes for INPUT
+-A ufw-before-input -p icmp --icmp-type destination-unreachable -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type time-exceeded -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type parameter-problem -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type echo-request -j ACCEPT
 
-# ufw configuration setting
-echo -e "Updating\n"
-sudo apt-get update
-echo -e "Installing UFW\n"
-sudo apt-get install -y ufw
-echo -e "Configuring UFW...\n"
-# Allow Outgoing and Deny Incoming
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-# Allow ports
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
-# Enable Fire Wall
-sudo ufw enable
+# ok icmp code for FORWARD
+-A ufw-before-forward -p icmp --icmp-type destination-unreachable -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type time-exceeded -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type parameter-problem -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type echo-request -j ACCEPT
 
-# Create the directory if it doesn't exist
-sudo mkdir -p /etc/iptables
+# allow dhcp client to work
+-A ufw-before-input -p udp --sport 67 --dport 68 -j ACCEPT
 
-# Add iptables rule for port redirection
-sudo iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+#
+# ufw-not-local
+#
+-A ufw-before-input -j ufw-not-local
 
-# Save iptables rules to a file
-sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+# if LOCAL, RETURN
+-A ufw-not-local -m addrtype --dst-type LOCAL -j RETURN
 
-# Restore iptables rules from the saved file (ensure this line is present in your startup scripts)
-sudo sh -c 'iptables-restore < /etc/iptables/rules.v4'
+# if MULTICAST, RETURN
+-A ufw-not-local -m addrtype --dst-type MULTICAST -j RETURN
 
-echo -e "Process Completed.\n"
+# if BROADCAST, RETURN
+-A ufw-not-local -m addrtype --dst-type BROADCAST -j RETURN
 
+# all other non-local packets are dropped
+-A ufw-not-local -m limit --limit 3/min --limit-burst 10 -j ufw-logging-deny
+-A ufw-not-local -j DROP
+
+# allow MULTICAST mDNS for service discovery (be sure the MULTICAST line above
+# is uncommented)
+-A ufw-before-input -p udp -d 224.0.0.251 --dport 5353 -j ACCEPT
+
+# allow MULTICAST UPnP for service discovery (be sure the MULTICAST line above
+# is uncommented)
+-A ufw-before-input -p udp -d 239.255.255.250 --dport 1900 -j ACCEPT
+
+# don't delete the 'COMMIT' line or these rules won't be processed
+COMMIT
