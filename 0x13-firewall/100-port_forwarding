@@ -16,13 +16,16 @@ sudo ufw allow 443
 # Enable Fire Wall
 sudo ufw enable
 
+# Create the directory if it doesn't exist
+sudo mkdir -p /etc/iptables
+
 # Add iptables rule for port redirection
 sudo iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
 
 # Save iptables rules to a file
 sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
 
-# Restore iptables rules from the saved file
+# Restore iptables rules from the saved file (ensure this line is present in your startup scripts)
 sudo sh -c 'iptables-restore < /etc/iptables/rules.v4'
 
 echo -e "Process Completed.\n"
