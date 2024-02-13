@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# ufw configuration setting
+echo -e "Updating\n"
+sudo apt-get update
+echo -e "Installing UFW\n"
+sudo apt-get install -y ufw
+echo -e "Configuring UFW...\n"
+# Allow Outgoing and Deny Incoming
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+# Allow ports
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+# Enable Fire Wall
+sudo ufw enable
+
+# Add iptables rule for port redirection
+sudo iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+
+# Save iptables rules to a file
+sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+
+# Restore iptables rules from the saved file
+sudo sh -c 'iptables-restore < /etc/iptables/rules.v4'
+
+echo -e "Process Completed.\n"
+
