@@ -14,8 +14,8 @@ if __name__ == "__main__":
     employee_id = sys.argv[1]
     user_response = requests.get(url + "users/{}".format(employee_id))
     user = user_response.json()
-    resource = {"userId": employee_id}
-    todos_request = requests.get(url + "todos", resource=resource)
+    params = {"userId": employee_id}
+    todos_request = requests.get(url + "todos", params=params)
     todos = todos_request.json()
     completed = []
     for todo in todos:
