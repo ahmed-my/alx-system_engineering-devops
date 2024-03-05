@@ -3,7 +3,7 @@
 Script that queries subscribers on a given Reddit subreddit.
 """
 import requests
-
+import sys
 
 def number_of_subscribers(subreddit):
     """returns the total number of subscribers for a given subreddit."""
