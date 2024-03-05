@@ -1,19 +1,14 @@
 #!/usr/bin/python3
-"""
-Script to query a list of all hot posts on a given Reddit subreddit.
-"""
-
+"""Contains recurse function"""
 import requests
 
 
 def recurse(subreddit, hot_list=[], after="", count=0):
-    """
-    Recursively retrieves a list of titles of all hot posts
-    on a given subreddit
-    """
-    url = f'https://www.reddit.com/r/{subreddit}/hot/.json'
+    """Returns a list of titles of all hot posts on a given subreddit."""
+    url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
     headers = {
-        "User-Agent": "Chrome/122.0.0.0"
+        "User-Agent": "0x16-api_advanced:project:\
+v1.0.0 (by /u/firdaus_cartoon_jr)"
     }
     params = {
         "after": after,
@@ -24,11 +19,13 @@ def recurse(subreddit, hot_list=[], after="", count=0):
                             allow_redirects=False)
     if response.status_code == 404:
         return None
+
     results = response.json().get("data")
     after = results.get("after")
     count += results.get("dist")
-    for child in results.get("children"):
-        hot_list.append(child.get("data").get("title"))
+    for c in results.get("children"):
+        hot_list.append(c.get("data").get("title"))
+
     if after is not None:
         return recurse(subreddit, hot_list, after, count)
     return hot_list
