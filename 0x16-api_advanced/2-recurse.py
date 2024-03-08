@@ -2,60 +2,32 @@
 """
 Script to query a list of all hot posts on a given Reddit subreddit.
 """
-
 import requests
 
+def recurse(subreddit, hot_list=[], after=None):
+    """Recursively fetches titles of hot articles for a given subreddit."""
+    base_url = f"https://www.reddit.com/r/{subreddit}/hot.json"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
 
-def recurse(subreddit, hot_list=[], after="", count=0):
-    """
-    Recursively retrieves a list of titles of all hot posts
-    on a given subreddit.
+    params = {"limit": 100, "after": after}
 
-    Args:
-        subreddit (str): The name of the subreddit.
-        hot_list (list, optional): List to store the post titles.
-                                    Default is an empty list.
-        after (str, optional): Token used for pagination.
-                                Default is an empty string.
-        count (int, optional): Current count of retrieved posts. Default is 0.
-
-    Returns:
-        list: A list of post titles from the hot section of the subreddit.
-    """
-    # Construct the URL for the subreddit's hot posts in JSON format
-    url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
-
-    # Define headers for the HTTP request, including User-Agent
-    headers = {
-        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/bdov_)"
-    }
-
-    # Define parameters for the request, including pagination and limit
-    params = {
-        "after": after,
-        "count": count,
-        "limit": 100
-    }
-
-    # Send a GET request to the subreddit's hot posts page
-    response = requests.get(url, headers=headers, params=params,
-                            allow_redirects=False)
-
-    # Check if the response status code indicates a not-found error (404)
-    if response.status_code == 404:
+    try:
+        response = requests.get(base_url, headers=headers, params=params, timeout=5)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
         return None
-    # Parse the JSON response and extract relevant data
-    results = response.json().get("data")
-    after = results.get("after")
-    count += results.get("dist")
 
-    # Append post titles to the hot_list
-    for c in results.get("children"):
-        hot_list.append(c.get("data").get("title"))
-
-    # If there are more posts to retrieve, recursively call the function
-    if after is not None:
-        return recurse(subreddit, hot_list, after, count)
-
-    # Return the final list of hot post titles
-    return hot_list
+    if 'data' in data and 'children' in data['data']:
+        children = data['data']['children']
+        if not children:
+            return hot_list
+        else:
+            titles = [child['data']['title'] for child in children]
+            hot_list.extend(titles)
+            next_after = data['data']['after']
+            return recurse(subreddit, hot_list, after=next_after)
+    else:
+        print(f"Invalid subreddit: {subreddit}")
+        return None
