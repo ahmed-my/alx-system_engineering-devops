@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 # Gracefully reloads gunicorn
-pgrep gunicorn | xargs -HUP
+>pgrep gunicorn | xargs -HUP
