@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# simple Bash script to reload Gunicorn in a graceful way
+# Gracefully reloads gunicorn
 pgrep gunicorn | xargs -I {} kill -HUP {}
 
