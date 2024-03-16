@@ -5,7 +5,7 @@ then
     echo "Gracefully reloading Gunicorn..."
 
     # Send signal to gracefully reload Gunicorn
-    kill -s HUP $(pgrep -x "gunicorn")
+    kill -s HUP "$(pgrep -x "gunicorn")"
 
     echo "Gunicorn reloaded gracefully."
 else
