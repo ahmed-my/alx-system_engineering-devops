@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Reload Gunicorn gracefully
-if gunicorn_pid=$(pgrep -x "gunicorn")
-then
-    echo "Gracefully reloading Gunicorn (PID: $gunicorn_pid)..."
+if pgrep -x "gunicorn" > /dev/null; then
+    echo "Gracefully reloading Gunicorn..."
 
-    # Send signal to gracefully reload Gunicorn
-    if kill -s HUP "$gunicorn_pid"; then
-        echo "OK"
-    else
-        echo "Failed to send signal"
-    fi
+    # Get the list of process IDs
+    pgrep -x "gunicorn" | while read -r pid; do
+        # Send signal to gracefully reload Gunicorn
+        kill -s HUP "$pid"
+    done
+
+    echo "OK"
 else
-    echo "Gunicorn is not running"
+    echo "NOK"
 fi
 
