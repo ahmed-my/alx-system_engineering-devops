@@ -7,8 +7,8 @@ then
     # Send signal to gracefully reload Gunicorn
     kill -s HUP "$(pgrep -x "gunicorn")"
 
-    echo "Gunicorn reloaded gracefully."
+    echo "OK"
 else
-    echo "Gunicorn is not running."
+    echo "NOK"
 fi
 
