@@ -8,9 +8,4 @@ if pgrep -x "gunicorn" > /dev/null; then
         # Send signal to gracefully reload Gunicorn
         kill -s HUP "$pid"
     done
-
-    echo "OK"
-else
-    echo "NOK"
 fi
-
